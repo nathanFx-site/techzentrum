@@ -54,6 +54,12 @@
             position: fixed;
             width: 100%;
             z-index: 1000;
+            top: 0;
+            left: 0;
+            transition: transform 0.3s ease;
+        }
+        header.hide-on-scroll {
+            transform: translateY(-100%);
         }
         
         .header-container {
@@ -1296,6 +1302,28 @@
         let allProducts = [];
         let uploadedImages = [];
         let currentProductId = null;
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+        const header = document.querySelector('header');
+
+        function handleScroll() {
+            if (window.scrollY > lastScrollY && window.scrollY > 80) {
+                // Scrolling down
+                header.classList.add('hide-on-scroll');
+            } else {
+                // Scrolling up
+                header.classList.remove('hide-on-scroll');
+            }
+            lastScrollY = window.scrollY;
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(handleScroll);
+                ticking = true;
+            }
+        });
         
         // Event Listeners
         navLinks.forEach(link => {
@@ -1539,11 +1567,9 @@
                 if (section) section.style.display = 'none';
             });
             
-            // Show the requested section
             if (sections[sectionName]) {
                 sections[sectionName].style.display = 'block';
                 
-                // Load section-specific data
                 if (sectionName === 'products') {
                     loadProducts();
                     populateBrandFilter();
@@ -1564,7 +1590,6 @@
             const product = allProducts.find(p => p.id === productId);
             
             if (product) {
-                // Update detail page with product information
                 detailTitle.textContent = product.name;
                 detailPrice.textContent = `${product.price.toLocaleString('de-DE')} €`;
                 detailCategory.textContent = product.category;
@@ -1574,14 +1599,12 @@
                 detailWarranty.textContent = product.warranty;
                 detailDescription.textContent = product.description;
                 
-                // Set main image
                 if (product.images && product.images.length > 0) {
                     detailMainImage.style.backgroundImage = `url('${product.images[0]}')`;
                 } else {
                     detailMainImage.style.backgroundImage = 'url(https://placehold.co/600x400/cccccc/333333/png?text=Kein+Bild)';
                 }
                 
-                // Create thumbnails
                 detailThumbnails.innerHTML = '';
                 if (product.images && product.images.length > 0) {
                     product.images.forEach((image, index) => {
@@ -1595,10 +1618,8 @@
                     });
                 }
                 
-                // Update wishlist button state
                 updateWishlistButtonState(productId);
                 
-                // Show detail section
                 showSection('productDetail');
             }
         }
@@ -1614,11 +1635,9 @@
         }
         
         function loadProducts() {
-            // Clear existing content
             featuredProductsContainer.innerHTML = '';
             productsGrid.innerHTML = '';
             
-            // Fetch products from Firestore
             db.collection('products').get()
                 .then((querySnapshot) => {
                     allProducts = [];
@@ -1634,18 +1653,15 @@
                         productsGrid.appendChild(productCard.cloneNode(true));
                     });
                     
-                    // Populate brands for filter
                     populateBrandFilter();
                 })
                 .catch((error) => {
                     console.error('Fehler beim Laden der Produkte: ', error);
-                    // Fallback to sample data if Firebase fails
                     loadSampleProducts();
                 });
         }
         
         function loadSampleProducts() {
-            // Sample products data
             const sampleProducts = [
                 {
                     id: "1",
@@ -1700,7 +1716,6 @@
                 productsGrid.appendChild(productCard.cloneNode(true));
             });
             
-            // Populate brands for filter
             populateBrandFilter();
         }
         
@@ -1727,7 +1742,6 @@
                 </div>
             `;
             
-            // Add event listeners
             card.querySelector('.btn').addEventListener('click', (e) => {
                 const productId = e.target.getAttribute('data-product-id');
                 showProductDetail(productId);
