@@ -1826,61 +1826,6 @@
             elements.checkoutTotal.textContent = formatPrice(total);
         }
 
-        // Handle checkout
-        function handleCheckout(e) {
-            e.preventDefault();
-            
-            if (!currentUser) {
-                showModal('login');
-                return;
-            }
-            
-            elements.checkoutLoading.style.display = 'block';
-            elements.checkoutError.style.display = 'none';
-            
-            // Create line items for Stripe
-            const lineItems = cart.map(item => ({
-                price_data: {
-                    currency: 'eur',
-                    product_data: {
-                        name: item.name,
-                        images: [item.image]
-                    },
-                    unit_amount: Math.round(item.price * 100)
-                },
-                quantity: item.quantity
-            }));
-            
-            // Add shipping as a separate line item
-            lineItems.push({
-                price_data: {
-                    currency: 'eur',
-                    product_data: {
-                        name: 'Standardversand'
-                    },
-                    unit_amount: 499 // €4.99 in cents
-                },
-                quantity: 1
-            });
-            
-            // In a real implementation, you would send this to your server
-            // to create a Stripe Checkout Session
-            setTimeout(() => {
-                elements.checkoutLoading.style.display = 'none';
-                
-                // Simulate successful checkout
-                alert('Checkout erfolgreich! In einer echten Implementierung würden Sie zu Stripe weitergeleitet.');
-                
-                // Clear cart
-                cart = [];
-                saveLocalStorage();
-                updateHeaderCounts();
-                
-                // Redirect to home
-                showSection('home');
-            }, 2000);
-        }
-
         // Populate brand filter
         function populateBrandFilter() {
             elements.searchBrand.innerHTML = '<option value="">Alle Marken</option>';
